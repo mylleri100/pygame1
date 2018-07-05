@@ -5,11 +5,12 @@ import random
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255,255,0)
+BLUE = (30, 74, 250)
+YELLOW = (220,255,0)
 SPEED = 2
 SIZE = 3
-BLOCKSIZE = 12*SIZE
+BLOCKSIZE = 12*SIZE # set 12 for normal, 6 for double, 3 for quadruple
+HOWMANYBLOCKS = 4  # 4 for normal, 8 for double, 16 for quad...
 WALLSIZE = 2*SIZE
  
 # --- Classes
@@ -31,7 +32,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__()        
         self.count=-1
         self.dir="stop"
-        self.image = pygame.Surface([10*SIZE,10*SIZE])
+        self.image = pygame.Surface([6*SIZE,6*SIZE])
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.rect.x=x
@@ -72,6 +73,11 @@ class Player(pygame.sprite.Sprite):
 # Initialize Pygame
 pygame.init()
 
+#game music
+pygame.mixer.music.load('mario.ogg')
+pygame.mixer.music.set_volume(0.2)
+pygame.mixer.music.play(-1)
+
 # Set the height and width of the screen
 screen_width = 112*SIZE
 screen_height = 112*SIZE
@@ -84,7 +90,9 @@ all_sprites_list = pygame.sprite.Group()
  
 # List of each WALL in the game
 outer_wall_list = pygame.sprite.Group()
-wall_list = pygame.sprite.Group()
+
+
+
  
 """ create game area """
 block = Block(BLUE,screen_width,WALLSIZE)
@@ -110,15 +118,16 @@ outer_wall_list.add(block)
 """End of game area"""
 
 
+
 block_offset=WALLSIZE+BLOCKSIZE
-for i in range(0,4):
-    for j in range(0,4):
+for i in range(0,HOWMANYBLOCKS):
+    for j in range(0,HOWMANYBLOCKS):
         block = Block(BLUE,BLOCKSIZE,BLOCKSIZE)
         block.rect.x = block_offset+i*2*BLOCKSIZE
         block.rect.y = block_offset+j*2*BLOCKSIZE
         # Add the block to the list of objects
-        print("tehtiin palikka kohtaan (x,y)", block.rect.x, " ", block.rect.y)
-        wall_list.add(block)
+        # print("tehtiin palikka kohtaan (x,y)", block.rect.x, " ", block.rect.y)
+        outer_wall_list.add(block)
         all_sprites_list.add(block)
  
 # Create player block
