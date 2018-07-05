@@ -30,9 +30,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):   
         # Call the parent class (Sprite) constructor
         super().__init__()        
-        self.count=-1
         self.dir="stop"
-        self.image = pygame.Surface([6*SIZE,6*SIZE])
+        self.image = pygame.Surface([12*SIZE,12*SIZE])
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.rect.x=x
@@ -47,7 +46,7 @@ class Player(pygame.sprite.Sprite):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_LEFT]: self.dir="left"
         elif pressed[pygame.K_RIGHT]: self.dir="right"
-        elif pressed[pygame.K_UP] and self.nogo!="up" : self.dir="up"
+        elif pressed[pygame.K_UP] : self.dir="up"
         elif pressed[pygame.K_DOWN]: self.dir="down"
         
         if self.dir=="left": self.rect.x -= SPEED
@@ -56,19 +55,26 @@ class Player(pygame.sprite.Sprite):
         if self.dir=="down": self.rect.y += SPEED
 
         if pygame.sprite.spritecollideany(self,outer_wall_list) != None:
-            self.rect.x=orig_x
-            self.rect.y=orig_y
-            ## direction that collides=nogo
-            self.nogo=self.dir
+            # prevent player to go out from playfield corners
+            if prev_dir==self.dir:
+                self.rect.x = orig_x
+                self.rect.y = orig_y
+            # player continues move forward if tries to turn/collide a block
+            elif prev_dir=="left":
+                self.rect.x = orig_x-SPEED
+                self.rect.y = orig_y
+            elif prev_dir=="right":
+                self.rect.x = orig_x+SPEED
+                self.rect.y = orig_y
+            elif prev_dir=="up" :
+                self.rect.y = orig_y-SPEED
+                self.rect.x = orig_x
+            elif prev_dir=="down":
+                self.rect.y = orig_y+SPEED
+                self.rect.x = orig_x
             self.dir=prev_dir
-            self.count=5
-        else:
-            self.count-=1
-            if self.count<0:
-                self.nogo = "none"
-        #DEBUGGING
-        #print("nogo:", self.nogo)
 
+            
 # --- Create the window
 # Initialize Pygame
 pygame.init()
