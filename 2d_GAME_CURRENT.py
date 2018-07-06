@@ -7,6 +7,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (30, 74, 250)
 YELLOW = (220,255,0)
+CRAPCOLOR = (255,255,0)
 SPEED =2
 PLAYER_SIZE=12
 SIZE = 3
@@ -21,12 +22,27 @@ class Block(pygame.sprite.Sprite):
     """ This class represents the gamearea builing block. Color, width (w) and height(h) passed as arguments """
     def __init__(self, color, w, h):
         # Call the parent class (Sprite) constructor
-        super().__init__()
- 
+        super().__init__() 
         self.image = pygame.Surface([w, h])
         self.image.fill(color)
         self.rect = self.image.get_rect()             
-####MODIFIED###
+
+class Crap(pygame.sprite.Sprite):
+    def __init__(self,color):
+        super().__init__()
+        self.image = pygame.Surface([2*SIZE, 2*SIZE])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        #new attrib..
+        self.eaten=False
+    def update(self):
+        if pygame.sprite.spritecollideany(self,player_list) != None:
+            self.eaten=True
+            all_sprites_list.remove(self)
+            
+            
+        
+
 class Player(pygame.sprite.Sprite):    
     def __init__(self, x, y):   
         # Call the parent class (Sprite) constructor
@@ -101,13 +117,12 @@ screen = pygame.display.set_mode([screen_width, screen_height])
  
 # --- Sprite lists
  
-# This is a list of every sprite. All blocks and the player block as well.
 all_sprites_list = pygame.sprite.Group()
- 
+player_list = pygame.sprite.Group()
 # List of each WALL in the game
 outer_wall_list = pygame.sprite.Group()
-
-
+# List of crap :)
+crap_list = pygame.sprite.Group()
 
  
 """ create game area """
@@ -131,10 +146,8 @@ block.rect.x = screen_width-WALLSIZE
 block.rect.y = 0
 all_sprites_list.add(block)
 outer_wall_list.add(block)                                         
-"""End of game area"""
 
-
-
+# create blocks in square matrix
 block_offset=WALLSIZE+BLOCKSIZE
 for i in range(0,HOWMANYBLOCKS):
     for j in range(0,HOWMANYBLOCKS):
@@ -144,20 +157,36 @@ for i in range(0,HOWMANYBLOCKS):
         # Add the block to the list of objects
         # print("tehtiin palikka kohtaan (x,y)", block.rect.x, " ", block.rect.y)
         outer_wall_list.add(block)
-        all_sprites_list.add(block)
+        all_sprites_list.add(block)       
+"""End of game area"""
+
+""" create some crap to eat """
+craps=HOWMANYBLOCKS*2+1
+crap_offset=(WALLSIZE+BLOCKSIZE/2)-SIZE
+for i in range (0,craps):
+    for j in range (0,craps):
+        crap = Crap(CRAPCOLOR)
+        crap.rect.x = crap_offset+12*SIZE*i
+        crap.rect.y = crap_offset+12*SIZE*j
+        crap_list.add(crap)
+        all_sprites_list.add(crap)  
+        
+        #remove crap inside blueblocks, replace this with more elegant later?
+        if pygame.sprite.spritecollideany(crap,outer_wall_list) != None:
+            crap_list.remove(crap)
+            all_sprites_list.remove(crap)
+""" end crapping for now """
  
 # Create player block
 player = Player(WALLSIZE, WALLSIZE)
 all_sprites_list.add(player)
-
+player_list.add(player)
 
 # Loop until the user clicks the close button.
 done = False
- 
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
- 
-score = 0
+#score = 0
 
 
 #INIT PLAYFIELD
