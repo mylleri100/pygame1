@@ -7,7 +7,8 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (30, 74, 250)
 YELLOW = (220,255,0)
-SPEED = 2
+SPEED =2
+PLAYER_SIZE=12
 SIZE = 3
 BLOCKSIZE = 12*SIZE # set 12 for normal, 6 for double, 3 for quadruple
 HOWMANYBLOCKS = 4  # 4 for normal, 8 for double, 16 for quad...
@@ -31,18 +32,24 @@ class Player(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()        
         self.dir="stop"
-        self.image = pygame.Surface([12*SIZE,12*SIZE])
-        self.image.fill(YELLOW)
+        self.size=PLAYER_SIZE*SIZE 
+        self.image = pygame.Surface([self.size,self.size])
+        self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.rect.x=x
-        self.rect.y=y 
+        self.rect.y=y
+        #boundaries for game area
+        self.max_x=screen_width-WALLSIZE-self.size
+        self.min_x=WALLSIZE
+        self.max_y=screen_height-WALLSIZE-self.size
+        self.min_y=WALLSIZE
         
     def update(self):
         """ Update the player's position. """
         orig_x=self.rect.x
         orig_y=self.rect.y
-        prev_dir=self.dir 
-
+        prev_dir=self.dir
+              
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_LEFT]: self.dir="left"
         elif pressed[pygame.K_RIGHT]: self.dir="right"
@@ -73,7 +80,10 @@ class Player(pygame.sprite.Sprite):
                 self.rect.y = orig_y+SPEED
                 self.rect.x = orig_x
             self.dir=prev_dir
-
+            #prevent corner bug again
+            if (self.rect.x < self.min_x) or (self.rect.x > self.max_x) or (self.rect.y > self.max_y) or (self.rect.y < self.min_y):
+                self.rect.x = orig_x
+                self.rect.y = orig_y
             
 # --- Create the window
 # Initialize Pygame
