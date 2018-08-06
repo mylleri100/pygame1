@@ -49,6 +49,7 @@ class Player(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()        
         self.dir="stop"
+        self.buffer_dir="empty"
         self.size=PLAYER_SIZE*SIZE 
         self.image = pygame.Surface([self.size,self.size])
         self.image.fill(WHITE)
@@ -65,19 +66,28 @@ class Player(pygame.sprite.Sprite):
         """ Update the player's position. """
         orig_x=self.rect.x
         orig_y=self.rect.y
+
         prev_dir=self.dir
+
+        #print("SELFDIR: ",self.dir)
+        #print("BUFFER: ", self.buffer_dir)
               
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_LEFT]: self.dir="left"
         elif pressed[pygame.K_RIGHT]: self.dir="right"
         elif pressed[pygame.K_UP] : self.dir="up"
         elif pressed[pygame.K_DOWN]: self.dir="down"
+        elif self.buffer_dir != "empty":
+            self.dir=self.buffer_dir
         
         if self.dir=="left": self.rect.x -= SPEED
         if self.dir=="right": self.rect.x += SPEED
         if self.dir=="up" : self.rect.y -= SPEED
         if self.dir=="down": self.rect.y += SPEED
 
+        #clear buffer before it might be used
+        self.buffer_dir="empty"
+        
         if pygame.sprite.spritecollideany(self,outer_wall_list) != None:
             # prevent player to go out from playfield corners
             if prev_dir==self.dir:
@@ -87,17 +97,23 @@ class Player(pygame.sprite.Sprite):
             elif prev_dir=="left":
                 self.rect.x = orig_x-SPEED
                 self.rect.y = orig_y
+                self.buffer_dir=self.dir
             elif prev_dir=="right":
                 self.rect.x = orig_x+SPEED
                 self.rect.y = orig_y
+                self.buffer_dir=self.dir
             elif prev_dir=="up" :
                 self.rect.y = orig_y-SPEED
                 self.rect.x = orig_x
+                self.buffer_dir=self.dir
             elif prev_dir=="down":
                 self.rect.y = orig_y+SPEED
                 self.rect.x = orig_x
+                self.buffer_dir=self.dir    
+            
+            # reset direction to continue forward 
             self.dir=prev_dir
-            #prevent corner bug again
+            #prevent corner bug again (does not affect other code)
             if (self.rect.x < self.min_x) or (self.rect.x > self.max_x) or (self.rect.y > self.max_y) or (self.rect.y < self.min_y):
                 self.rect.x = orig_x
                 self.rect.y = orig_y
