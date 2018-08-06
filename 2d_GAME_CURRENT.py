@@ -1,6 +1,7 @@
 import pygame
 import random
- 
+
+""" human controlled pacman, will be evolved to AI control later """ 
 # Define some constants
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
